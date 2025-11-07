@@ -87,9 +87,30 @@ def save_csv(rows: List[Dict[str, Any]], path: str) -> None:
         writer.writerows(rows)
     print(f"Saved {len(rows)} repos to {path}")
     
-# 6) Main
+# 6) Pretty print top 5 by stars and recent update
+def print_summaries(rows: List[Dict[str, Any]]) -> None:
+    if not rows:
+        print("No repos to summarize.")
+        return
+    
+    # Top by stars 
+    top_stars = sorted(rows, key=lambda r: r["stargazers_count"], reverse=True)[:5]
+    print("\n Top 5 by Stars")
+    print("------------------")    
+    for r in top_stars:
+        print(f"{r['stargazers_count']:>3}★  {r['name']}  → {r['html_url']}")
+    
+    # Most recently updated
+    top_recent = sorted(rows, key=lambda r: (r["pushed_at"] or ""), reverse=True)[:5]
+    print("\n Top 5 Recently Updated")
+    print("--------------------------")
+    for r in top_recent:
+        print(f"{r['pushed_at']}  {r['name']}  → {r['html_url']}")
+    
+# 7) Main
 if __name__ == "__main__":
     print(f"Fetching repos for : {USERNAME}")
     repos = fetch_all_repos(USERNAME)
     rows = [simplify(r) for r in repos]
     save_csv(rows, "repos.csv")
+    print_summaries(rows)
