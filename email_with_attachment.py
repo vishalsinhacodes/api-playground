@@ -51,8 +51,13 @@ def send_mail_with_attachment(subject: str, body_text: str, attachment_path: str
     print(f"Sent email with attachment: {os.path.basename(attachment_path)}")
     
 if __name__ == "__main__":
-    send_mail_with_attachment(
-        subject="Repos csv Report",
-        body_text="Attached is the latest repo csv file.",
-        attachment_path="repos.csv",
-    )
+    # Minimal runtime: send the latest repos.csv
+    try:
+        send_mail_with_attachment(
+            subject="Repos CSV Report",
+            body_text="Attached is the latest repos.csv generated from GitHub API.",
+            attachment_path="repos.csv",
+        )
+    except Exception as e:
+        # Friendly error surface (e.g., missing .env, wrong password, no file)
+        print(f"Failed to send email: {e}")
