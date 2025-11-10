@@ -15,8 +15,12 @@ def run(cmd: list[str]) -> None:
     subprocess.run(cmd, cwd=ROOT, check=True)
 
 if __name__ == "__main__":
-    # 2) Generate the latest repos.csv
+    # 1) Refresh GitHub repos report
     run([sys.executable, "github_repos_to_csv.py"])
-    # 3) Email it as an attachment
+    
+    # 2) Refresh Weather report
+    run([sys.executable, "weather_current_to_csv.py"])
+    
+    # 3) Email (currently sends repos.csv)
     run([sys.executable, "email_with_attachment.py"])
-    print("\nDaily report completed.")
+    print("\n✅ Daily report completed.")
