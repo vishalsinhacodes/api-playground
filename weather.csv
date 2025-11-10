@@ -1,0 +1,2 @@
+city,country,weather,weather_desc,temp,feels_like,temp_min,temp_max,pressure_hpa,humidity_pct,wind_speed,wind_deg,clouds_pct,visibility_m,timestamp
+Noida,IN,Clear,clear sky,21.16,19.59,21.16,21.16,1014,10,2.04,302,5,10000,1762753614
