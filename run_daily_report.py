@@ -22,5 +22,5 @@ if __name__ == "__main__":
     run([sys.executable, "weather_current_to_csv.py"])
     
     # 3) Email (currently sends repos.csv)
-    run([sys.executable, "email_with_attachment.py"])
+    run([sys.executable, "email_html_report.py"])
     print("\n✅ Daily report completed.")
