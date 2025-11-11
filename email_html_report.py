@@ -1,71 +1,96 @@
 import os
-import csv
 import ssl
+import csv
 import smtplib
 import mimetypes
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from email import encoders
 from dotenv import load_dotenv
 from datetime import datetime
 
-# 1) Load .env (keeps secrets & config out of code)
+# 1) Load .env
 load_dotenv()
 SENDER = os.getenv("MAIL_SENDER")
 APP_PASS = os.getenv("MAIL_APP_PASSWORD")
 RECEIVER = os.getenv("MAIL_RECEIVER", SENDER)
 
-# ---------- helpers: data loading ----------
+# ---------- data readers ----------
 
 def read_top_repos(csv_path: str, top_n: int = 5):
-    """Read repos.csv and return top repos by stars (desc)."""
     rows = []
     if not os.path.isfile(csv_path):
         return rows
     with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for r in reader:
-            # safe conversions
-            r["stargazers_count"] = int(r.get("stargazers_count") or 0)
-            rows.append(r)
+        r = csv.DictReader(f)
+        for row in r:
+            row["stargazers_count"] = int(row.get("stargazers_count") or 0)
+            rows.append(row)
     rows.sort(key=lambda r: r["stargazers_count"], reverse=True)
     return rows[:top_n]
 
 def read_weather(csv_path: str):
-    """Read single-row weather.csv snapshot."""
     if not os.path.isfile(csv_path):
-        return{}
+        return {}
     with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for r in reader:
-            return r # first row only
+        r = csv.DictReader(f)
+        for row in r:
+            return row
     return {}
 
-# ---------- helpers: email building ----------
+def read_crypto_latest(csv_path: str, curr: str):
+    """Return summary dict: latest price, min, max, count."""
+    if not os.path.isfile(csv_path):
+        return {}
+    prices = []
+    latest = None
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        r = csv.DictReader(f)
+        for row in r:
+            p = float(row.get(f"price_{curr}") or 0.0)
+            prices.append(p)
+            latest = row
+    if not prices:
+        return {}
+    return {
+        "latest_iso": latest.get("iso_time"),
+        "latest_price": prices[-1],
+        "min_price": min(prices),
+        "max_price": max(prices),
+        "count": len(prices),
+    }
+
+# ---------- attachments & html ----------
+
 def attach_file(msg: MIMEMultipart, filepath: str) -> None:
-    """Attach arbitrary file with correct MIME type."""    
     if not os.path.isfile(filepath):
         raise FileNotFoundError(f"Attachment not found: {filepath}")
-    
     ctype, encoding = mimetypes.guess_type(filepath)
     if ctype is None or encoding is not None:
         ctype = "application/octet-stream"
     maintype, subtype = ctype.split("/", 1)
-    
     with open(filepath, "rb") as f:
         part = MIMEBase(maintype, subtype)
         part.set_payload(f.read())
-        
     encoders.encode_base64(part)
     part.add_header("Content-Disposition", f'attachment; filename="{os.path.basename(filepath)}"')
     msg.attach(part)
-    
-def build_html(top_repos, weather):
-    """Return a clean HTML string fro the inline report."""
+
+def attach_inline_image(msg_root: MIMEMultipart, img_path: str, cid: str) -> None:
+    """Attach image as inline (Content-ID). Reference with <img src="cid:..."> in HTML."""
+    if not os.path.isfile(img_path):
+        return
+    with open(img_path, "rb") as f:
+        img = MIMEImage(f.read())
+    img.add_header("Content-ID", f"<{cid}>")
+    img.add_header("Content-Disposition", "inline", filename=os.path.basename(img_path))
+    msg_root.attach(img)
+
+def build_html(top_repos, weather, crypto, curr: str):
     today = datetime.now().strftime("%Y-%m-%d %H:%M")
-    
-    # minimal, safe inline-styles for wide client support
+
     style = """
       body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f6f8fb;}
       .wrap{max-width:720px;margin:0 auto;padding:24px;}
@@ -78,8 +103,8 @@ def build_html(top_repos, weather):
       .muted{color:#667085;font-size:12px}
       .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef6ff}
     """
-    
-    # weather block
+
+    # Weather bits
     w_city = weather.get("city") or "-"
     w_country = weather.get("country") or "-"
     w_temp = weather.get("temp") or "-"
@@ -87,7 +112,23 @@ def build_html(top_repos, weather):
     w_hum = weather.get("humidity_pct") or "-"
     w_wind = weather.get("wind_speed") or "-"
 
-    # repos table rows (name | stars | link)
+    # Crypto bits
+    latest = crypto.get("latest_price")
+    c_min = crypto.get("min_price")
+    c_max = crypto.get("max_price")
+    c_time = crypto.get("latest_iso")
+    crypto_block = f"""
+      <p style="margin:8px 0 0;">
+        Latest: <strong>{latest if latest is not None else '-'}</strong> {curr.upper()}<br>
+        Range (last {crypto.get('count','-')} pts): {c_min} – {c_max} {curr.upper()}<br>
+        Updated: {c_time or '-'}
+      </p>
+      <div style="margin-top:8px">
+        <img src="cid:crypto_chart" alt="Crypto chart" style="max-width:100%;border:1px solid #eee;border-radius:8px"/>
+      </div>
+    """
+
+    # Repos rows
     repo_rows = ""
     for r in top_repos:
         name = r.get("name", "-")
@@ -119,6 +160,11 @@ def build_html(top_repos, weather):
           </div>
 
           <div class="card">
+            <h2>₿ Crypto ({curr.upper()})</h2>
+            {crypto_block}
+          </div>
+
+          <div class="card">
             <h2>⭐ Top Repositories</h2>
             <table>
               <thead>
@@ -130,52 +176,56 @@ def build_html(top_repos, weather):
             </table>
           </div>
 
-          <div class="muted">CSV attachments included: repos.csv, weather.csv</div>
+          <div class="muted">CSV attachments included: repos.csv, weather.csv, crypto_latest.csv</div>
         </div>
       </body>
     </html>
     """
     return html
 
-def send_html_report(attachments: list[str]) -> None:
-    """Compose a multipart/alternative email (plain + HTML) with attachments."""
+def send_html_report(attachments: list[str], curr: str) -> None:
     if not SENDER or not APP_PASS:
         raise SystemExit("Missing MAIL_SENDER or MAIL_APP_PASSWORD in .env")
 
-    # 1) Load data produced by your other scripts
+    # Load data
     top_repos = read_top_repos("repos.csv", top_n=5)
     weather = read_weather("weather.csv")
+    crypto = read_crypto_latest("data/crypto_latest.csv", curr=curr)
 
-    # 2) Build both plain-text fallback and rich HTML
-    plain = "Daily report attached.\n- repos.csv\n- weather.csv\n"
-    html = build_html(top_repos, weather)
+    # Body parts
+    plain = "Daily report attached.\n- repos.csv\n- weather.csv\n- crypto_latest.csv\n"
+    html = build_html(top_repos, weather, crypto, curr)
 
-    # 3) multipart/mixed (root) → multipart/alternative (body) + attachments
+    # Root with attachments
     root = MIMEMultipart("mixed")
-    root["Subject"] = "Daily HTML Report: GitHub & Weather"
+    root["Subject"] = "Daily HTML Report: GitHub, Weather & Crypto"
     root["From"] = SENDER
     root["To"] = RECEIVER
 
-    # The body part holds plain + html alternatives (for compatibility)
+    # Body (plain + html)
     body = MIMEMultipart("alternative")
     body.attach(MIMEText(plain, "plain"))
     body.attach(MIMEText(html, "html"))
     root.attach(body)
 
-    # 4) Add all requested attachments (CSV files)
+    # Inline crypto chart
+    attach_inline_image(root, "charts/crypto_latest.png", cid="crypto_chart")
+
+    # File attachments
     for path in attachments:
         attach_file(root, path)
 
-    # 5) Send securely via Gmail SMTP (implicit SSL)
+    # Send
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(SENDER, APP_PASS)
         server.sendmail(SENDER, [RECEIVER], root.as_string())
 
-    print("✅ Sent HTML report with attachments.")
+    print("✅ Sent HTML report with inline chart and attachments.")
 
 if __name__ == "__main__":
     try:
-        send_html_report(["repos.csv", "weather.csv"])
+        curr = os.getenv("CRYPTO_CURRENCY", "inr")
+        send_html_report(["repos.csv", "weather.csv", "data/crypto_latest.csv"], curr=curr)
     except Exception as e:
-        print(f"❌ Failed to send HTML report: {e}") 
+        print(f"❌ Failed to send HTML report: {e}")
