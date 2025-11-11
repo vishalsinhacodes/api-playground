@@ -1,6 +1,8 @@
 import os
 import csv
+import pathlib
 import requests
+from datetime import datetime
 from typing import Dict,Any
 from dotenv import load_dotenv
 
@@ -14,6 +16,10 @@ UNITS = os.getenv("OWN_UNITS", "metric") # metric = °C, imperial = °F
 # 2) Basic guardrail: ensure key exists
 if not API_KEY:
     raise SystemError("Missing OWN_API_KEY in .env")
+
+ROOT = pathlib.Path(__file__).parent.resolve()
+DATA_DIR = ROOT / "data"
+DATA_DIR.mkdir(exist_ok=True)
 
 # 3) Build endpoint and params
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
@@ -54,6 +60,7 @@ def g(path, default=None):
     return cur
 
 row = {
+    "snapshot_date": datetime.now().strftime("%Y-%m-%d"),
     "city": g(["name"]),
     "country": g(["sys", "country"]),
     "weather": g(["weather"], [{}])[0].get("main") if g(["weather"]) else None,
@@ -71,11 +78,15 @@ row = {
     "timestamp": g(["dt"]),  # Unix epoch seconds
 }
 
-# 8) Save to CSV (single-row snapshot)
-csv_path = "weather.csv"
-with open (csv_path, "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=list(row.keys()))
-    writer.writeheader()
-    writer.writerow(row)
+today = datetime.now().strftime("%Y%m%d")
+dated = DATA_DIR / f"weather_{CITY}_{COUNTRY}_{today}.csv"
+latest = DATA_DIR / "weather_latest.csv"
+
+# 8) Save single-row CSVs (dated + latest)
+for path in (dated, latest):
+    with open (path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        writer.writeheader()
+        writer.writerow(row)
     
-print(f"Saved current weather to {csv_path} for {row['city']}, {row['country']}")  
+print(f"✅ Saved Weather snapshots: {dated.name} & weather_latest.csv for {row['city']}, {row['country']}")

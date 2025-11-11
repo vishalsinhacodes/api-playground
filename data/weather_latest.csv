@@ -1,0 +1,2 @@
+snapshot_date,city,country,weather,weather_desc,temp,feels_like,temp_min,temp_max,pressure_hpa,humidity_pct,wind_speed,wind_deg,clouds_pct,visibility_m,timestamp
+2025-11-11,Noida,IN,Clear,clear sky,24.16,22.94,24.16,24.16,1014,12,3.26,308,8,10000,1762843815

@@ -1,14 +1,20 @@
 import os 
 import csv
 import time
+import pathlib
+from datetime import datetime
 import requests
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from dotenv import load_dotenv
 
 # 1) Load config from .env
 load_dotenv()
 USERNAME = os.getenv("GITHUB_USERNAME", "vishalsinhacodes")
 TOKEN = os.getenv("GITHUB_TOKEN") # optional; inceases rate limit if set
+
+ROOT = pathlib.Path(__file__).parent.resolve()
+DATA_DIR = ROOT / "data"
+DATA_DIR.mkdir(exist_ok=True)
 
 # 2) Helper: Get with headers
 def get(url: str) -> requests.Response:
@@ -72,7 +78,8 @@ def simplify(repo: Dict[str, Any]) -> Dict[str, Any]:
         "created_at": repo.get("created_at"),
         "updated_at": repo.get("updated_at"),
         "pushed_at": repo.get("pushed_at"),
-        "size_kb": repo.get("size"),        
+        "size_kb": repo.get("size"),
+        "snapshot_date": datetime.now().strftime("%Y-%m-%d"),     
     }
     
 # 5) Save to csv
@@ -85,7 +92,6 @@ def save_csv(rows: List[Dict[str, Any]], path: str) -> None:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-    print(f"Saved {len(rows)} repos to {path}")
     
 # 6) Pretty print top 5 by stars and recent update
 def print_summaries(rows: List[Dict[str, Any]]) -> None:
@@ -112,5 +118,17 @@ if __name__ == "__main__":
     print(f"Fetching repos for : {USERNAME}")
     repos = fetch_all_repos(USERNAME)
     rows = [simplify(r) for r in repos]
-    save_csv(rows, "repos.csv")
-    print_summaries(rows)
+    
+    # Dated + latest filenames
+    today = datetime.now().strftime("%Y%m%d")
+    dated = DATA_DIR / f"github_repos_{USERNAME}_{today}.csv"
+    latest = DATA_DIR / f"github_repos_latest.csv"
+
+    save_csv(rows, dated)
+    save_csv(rows, latest)
+    
+    # Keep a simple "current summary" alongside (optional helper)
+    total = len(rows)
+    public = sum(1 for r in rows if r["visibility"] == "public")
+    stars = sum(int(r["stargazers_count"] or 0) for r in rows)
+    print(f"✅ Saved GitHub snapshots: {dated.name} & github_repos_latest.csv | repos={total}, public={public}, stars={stars}")
