@@ -150,9 +150,11 @@ def build_html(headline, top_repos, totals, weather, crypto, curr: str):
           </div>
 
           <div class="card">
-            <h2>🌤️ Weather</h2>
-            <div><span class="badge">{w_city}, {w_country}</span></div>
-            <p style="margin:8px 0 0;">{w_desc} — <strong>{w_temp}°</strong> (humidity {w_hum}%, wind {w_wind})</p>
+            <h2>🌡️ 7-Day Temp Trend</h2>
+            <p class="muted">Recent 7-day temperature snapshot.</p>
+            <div style="margin-top:8px">
+              <img src="cid:weather_chart" alt="Weather trend" style="max-width:100%;border:1px solid #eee;border-radius:8px"/>
+            </div>
           </div>
 
           <div class="card">
@@ -209,6 +211,8 @@ def send_html_report() -> None:
 
     # Inline chart
     attach_inline_image(root, CHARTS / "crypto_latest.png", cid="crypto_chart")
+    # Inline weather chart
+    attach_inline_image(root, CHARTS / "weather_trend_latest.png", cid="weather_chart")
 
     # Attach the 3 latest CSVs
     for name in ("github_repos_latest.csv", "weather_latest.csv", "crypto_latest.csv"):

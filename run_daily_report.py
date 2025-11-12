@@ -24,6 +24,10 @@ if __name__ == "__main__":
     # 3) Refresh Crypto report
     run([sys.executable, "crypto_prices_to_csv.py"])
     
-    # 4) Email (currently sends repos.csv)
+    # 4) build weather trend from recent snapshots
+    run([sys.executable, "weather_trend_chart.py"])    
+    
+    # 5) Email (currently sends repos.csv)
     run([sys.executable, "email_html_report.py"])
-    print("\n✅ Daily HTML report (history + latest) completed.")
+    
+    print("\n✅ Daily HTML report (with weather trend and crypto) completed.")
