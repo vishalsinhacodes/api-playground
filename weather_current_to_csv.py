@@ -89,4 +89,4 @@ for path in (dated, latest):
         writer.writeheader()
         writer.writerow(row)
     
-print(f"✅ Saved Weather snapshots: {dated.name} & weather_latest.csv for {row['city']}, {row['country']}")
+print(f"Saved Weather snapshots: {dated.name} & weather_latest.csv for {row['city']}, {row['country']}")

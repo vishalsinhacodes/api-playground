@@ -1,0 +1,18 @@
+Fetching repos for : vishalsinhacodes
+Saved GitHub snapshots: github_repos_vishalsinhacodes_20251113.csv & github_repos_latest.csv | repos=2, public=2, stars=0
+Saved Weather snapshots: weather_Noida_IN_20251113.csv & weather_latest.csv for Noida, IN
+Saved: crypto_bitcoin_inr_20251113.csv and chart crypto_bitcoin_inr_20251113.png
+Saved weather trend chart: weather_trend_20251113.png and weather_trend_latest.png
+Sent HTML report with history-backed latest snapshots + inline chart.
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe github_repos_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe weather_current_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe crypto_prices_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe weather_trend_chart.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe email_html_report.py
+
+Daily HTML report (with weather trend and crypto) completed.

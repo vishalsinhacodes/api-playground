@@ -88,4 +88,4 @@ plt.savefig(png_path, dpi=120)
 plt.savefig(png_latest, dpi=120)
 plt.close()
 
-print(f"✅ Saved: {csv_path.name} and chart {png_path.name}")
+print(f"Saved: {csv_path.name} and chart {png_path.name}")

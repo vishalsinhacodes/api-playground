@@ -223,10 +223,10 @@ def send_html_report() -> None:
         server.login(SENDER, APP_PASS)
         server.sendmail(SENDER, [RECEIVER], root.as_string())
 
-    print("✅ Sent HTML report with history-backed latest snapshots + inline chart.")
+    print("Sent HTML report with history-backed latest snapshots + inline chart.")
 
 if __name__ == "__main__":
     try:
         send_html_report()
     except Exception as e:
-        print(f"❌ Failed to send HTML report: {e}")
+        print(f"Failed to send HTML report: {e}")

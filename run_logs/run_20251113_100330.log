@@ -1,0 +1,18 @@
+Fetching repos for : vishalsinhacodes
+Traceback (most recent call last):
+  File "D:\Vishal\dev\api-playground\github_repos_to_csv.py", line 134, in <module>
+    print(f"\u2705 Saved GitHub snapshots: {dated.name} & github_repos_latest.csv | repos={total}, public={public}, stars={stars}")
+  File "C:\Users\Palla\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe github_repos_to_csv.py
+Traceback (most recent call last):
+  File "D:\Vishal\dev\api-playground\run_daily_report.py", line 19, in <module>
+    run([sys.executable, "github_repos_to_csv.py"])
+  File "D:\Vishal\dev\api-playground\run_daily_report.py", line 15, in run
+    subprocess.run(cmd, cwd=ROOT, check=True)
+  File "C:\Users\Palla\anaconda3\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['D:\\Vishal\\dev\\api-playground\\.venv\\Scripts\\python.exe', 'github_repos_to_csv.py']' returned non-zero exit status 1.

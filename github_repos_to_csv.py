@@ -131,4 +131,4 @@ if __name__ == "__main__":
     total = len(rows)
     public = sum(1 for r in rows if r["visibility"] == "public")
     stars = sum(int(r["stargazers_count"] or 0) for r in rows)
-    print(f"✅ Saved GitHub snapshots: {dated.name} & github_repos_latest.csv | repos={total}, public={public}, stars={stars}")
+    print(f"Saved GitHub snapshots: {dated.name} & github_repos_latest.csv | repos={total}, public={public}, stars={stars}")

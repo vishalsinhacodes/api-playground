@@ -57,7 +57,7 @@ def send_mail_with_attachments(subject: str, body_text: str, attachments: list[s
         server.sendmail(SENDER, [RECEIVER], msg.as_string())
 
     names = ", ".join(os.path.basename(p) for p in attachments)
-    print(f"✅ Sent email with attachments: {names}")
+    print(f"Sent email with attachments: {names}")
 
 if __name__ == "__main__":
     # Send both CSVs together
@@ -72,4 +72,4 @@ if __name__ == "__main__":
             attachments=["repos.csv", "weather.csv"],
         )
     except Exception as e:
-        print(f"❌ Failed to send email: {e}")
+        print(f"Failed to send email: {e}")

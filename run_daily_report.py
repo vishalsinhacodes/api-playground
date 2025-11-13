@@ -30,4 +30,4 @@ if __name__ == "__main__":
     # 5) Email (currently sends repos.csv)
     run([sys.executable, "email_html_report.py"])
     
-    print("\n✅ Daily HTML report (with weather trend and crypto) completed.")
+    print("\nDaily HTML report (with weather trend and crypto) completed.")

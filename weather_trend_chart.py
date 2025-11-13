@@ -100,7 +100,7 @@ def build_and_save_chart(points: List[Tuple[str, float]]) -> None:
     plt.savefig(png_latest, dpi=120)
     plt.close()
     
-    print(f"✅ Saved weather trend chart: {png_path.name} and weather_trend_latest.png")
+    print(f"Saved weather trend chart: {png_path.name} and weather_trend_latest.png")
     
 if __name__ == "__main__":
     points = collect_last_n_temperatures(7)

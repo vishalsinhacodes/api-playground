@@ -1,0 +1,42 @@
+Fetching repos for : vishalsinhacodes
+Saved GitHub snapshots: github_repos_vishalsinhacodes_20251113.csv & github_repos_latest.csv | repos=2, public=2, stars=0
+Saved Weather snapshots: weather_Noida_IN_20251113.csv & weather_latest.csv for Noida, IN
+Saved: crypto_bitcoin_inr_20251113.csv and chart crypto_bitcoin_inr_20251113.png
+Saved weather trend chart: weather_trend_20251113.png and weather_trend_latest.png
+Traceback (most recent call last):
+  File "D:\Vishal\dev\api-playground\email_html_report.py", line 230, in <module>
+    send_html_report()
+  File "D:\Vishal\dev\api-playground\email_html_report.py", line 226, in send_html_report
+    print("\u2705 Sent HTML report with history-backed latest snapshots + inline chart.")
+  File "C:\Users\Palla\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\Vishal\dev\api-playground\email_html_report.py", line 232, in <module>
+    print(f"\u274c Failed to send HTML report: {e}")
+  File "C:\Users\Palla\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 0: character maps to <undefined>
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe github_repos_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe weather_current_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe crypto_prices_to_csv.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe weather_trend_chart.py
+
+$ D:\Vishal\dev\api-playground\.venv\Scripts\python.exe email_html_report.py
+Traceback (most recent call last):
+  File "D:\Vishal\dev\api-playground\run_daily_report.py", line 31, in <module>
+    run([sys.executable, "email_html_report.py"])
+  File "D:\Vishal\dev\api-playground\run_daily_report.py", line 15, in run
+    subprocess.run(cmd, cwd=ROOT, check=True)
+  File "C:\Users\Palla\anaconda3\Lib\subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['D:\\Vishal\\dev\\api-playground\\.venv\\Scripts\\python.exe', 'email_html_report.py']' returned non-zero exit status 1.
